@@ -54,7 +54,7 @@ Format Plugins #}
       {%- if key == 'plugin_name' or key == 'cond' %} {#pass#}
       {#-
       Format Boolean Values #}
-      {%- elif value is sameas True or value is sameas False %}
+      {%- elif value == True or value == False %}
         {{- output_indented(col, (key + ' => ' + value|string|lower)) }}
       {#-
       Format Strings and Numbers #}
