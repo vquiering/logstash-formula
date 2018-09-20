@@ -66,7 +66,11 @@ Format Plugins #}
         {{- output_indented(col, (key + ' => {')) }}
         {%- set col = col + logstash.indent %}
         {%- for attr_key, attr_value in value.items() %}
-          {{- output_indented(col, (attr_key + ' => "' + attr_value + '"')) }}
+          {%- if attr_value is mapping %}
+            {{- attr_recurse(col, attr_key, attr_value)  }}
+          {%- else %}
+            {{- output_indented(col, (attr_key + ' => "' + attr_value + '"')) }}
+          {%- endif %}
         {%- endfor %}
         {%- set col = col - logstash.indent %}
         {{- output_indented(col, '}') }}
@@ -132,7 +136,7 @@ Format Conditionals #}
     {{- output_indented(col, verb + ' ' + plugin.cond + ' {') }}
   {%- elif verb == 'else' %}
     {{- output_indented(col, verb + ' {') }}
-  {%- endif %} 
+  {%- endif %}
   {%- set col = col + logstash.indent %}
   {%- for p in plugin[verb].then %}
     {{- format_plugin(col, p) }}
@@ -144,4 +148,19 @@ Format Conditionals #}
 Output Indented #}
 {%- macro output_indented(col, string) %}
 {{ string|indent(col, true) -}}
+{%- endmacro %}
+{#-
+Recursive Mapping #}
+{%- macro attr_recurse(col, key, value) %}
+{{- output_indented(col, (key + ' => {')) }}
+{%- set col = col + logstash.indent %}
+{%- for attr_key, attr_value in value.items() %}
+  {%- if attr_value is mapping %}
+    {{- attr_recurse(col, attr_key, attr_value)  }}
+  {%- else %}
+    {{- output_indented(col, (attr_key + ' => "' + attr_value + '"')) }}
+  {%- endif %}
+{%- endfor %}
+{%- set col = col - logstash.indent %}
+{{- output_indented(col, '}') }}
 {%- endmacro %}
